@@ -1,0 +1,159 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+namespace _1234
+{
+                                                                                        
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        string path;                                                                    //  Добавление пути как строки                                                              
+        private void Button3_Click(object sender, EventArgs e)                          //  Кнопка для ввода пути и видимости остального контента
+        {
+            path = textBox4.Text;                                                       //  Путь к файлу
+            textBox1.Visible = true;                                                    //
+            textBox2.Visible = true;                                                    //  Видимость
+            label1.Visible = true;                                                      //  Остальных
+            label2.Visible = true;                                                      //  Элементов
+            button1.Visible = true;                                                     //
+            button2.Visible = true;                                                     //
+
+
+                                                                                         // Мой путь (Не обращать внимание) C:\Users\Zver\Desktop\lul.txt
+
+        }
+        private void Button1_Click(object sender, EventArgs e)                          //  Основная кнопка для работы алгоритма
+        {
+            this.pictureBox1.Visible = true;                                            //  Картинка видима
+            this.pictureBox1.Left = -1000;                                              //  Стартовая позиция для картинки
+            timer1.Enabled = true;                                                      //  Включение тиков таймера для перемещения картинки
+            textBox2.Text = "";                                                         //  
+            textBox3.Text = "";                                                         //  Очистка окон после предыдущего запроса
+
+           // System.IO.File.ReadAllText(@path).Replace("\n", " ");                     //  Часть первой версии создания массива строк (можно пропустить)
+
+            string res = textBox1.Text;                                                 //  Помещаем в переменную то, что ввел пользователь
+            res = res.ToLower();                                                        //  Понижение регистра для избавления от ошибок с ним
+            res = res.Replace("ё", "е");                                                //  Защита от Сёменов и Семенов
+            res = res.Replace("\r", "");                                                //  Защита от нажатия Enter
+            res = res.Replace("\n", "");                                                //  
+            string[] d = File.ReadAllLines(path);                                       //  Чтение строк v2.0 из файла
+
+
+            for (int g = 0; g < d.Length; g++)                                          //  Проход по всем строкам
+            {                                                       
+                d[g] = d[g].ToLower();                                                  //  Понижение регистра на всякий случай
+                d[g] = d[g].Replace("ё", "е");                                          //  Защита от Семёнов и Семенов part 2
+            }
+
+            if (res.Contains(" ") == true)                                                                                      //  Если в поиске несколько слов, разбивам по пробелам                                                      
+            {                                                                                                                   //
+                string[] words = res.Split(' ');                                                                                //
+                                                                                                                                //
+                for (int j = 0; j < d.Length; j++)                                                                              //  Для всех строк                                                                              
+                {                                                                                                               //
+                    for (int g = 0; g < words.Length; g++)                                                                      //  Для всех слов
+                    {
+                        if (textBox3.Text.Contains(d[j]) == false)                                                              //  Защита от дублей результата при находжении 2+ слов
+                        {
+                            if (d[j].Contains(words[g] + " ") == true && textBox1.Text != "" && IsDigitsOnly(res) == false)     //  Если содержит слово, НЕ пустой первый текстбокс(если пустой выдадет весь список
+                            {                                                                                                   //  и если это не номер телефона
+                                textBox3.Text += d[j] + '\r' + '\n';                                                            //  Добавляем в 3 текстбокс
+                            }                                                                                                   //
+                            if (d[j].Contains(words[g]) == true && textBox1.Text != "" && IsDigitsOnly(res) == true)            //  То же самое только для номера телефона
+                            {
+                                textBox3.Text += d[j] + '\r' + '\n';
+                            }
+                        }
+                    }                                                                                                       
+                                                                                                                            
+                }                                                                                                           
+                if (textBox3.Text == "")                                                                                    //  Если ничего не найдено
+                {                                                                                                           
+                    textBox3.Text = "Таких нету";                                                                           
+                }                                                                                                           
+            }
+            else                                                                                                            //  То же самое, только для одного слова в поиске                                                                                                    
+            {
+                for (int j = 0; j < d.Length; j++)
+                {
+                    if (d[j].Contains(res + " ") == true && textBox1.Text != "" && IsDigitsOnly(res) == false)
+                    {
+                        textBox3.Text += d[j] + '\r' + '\n';
+                    }
+                    else
+                    {
+                        if (d[j].Contains(res) == true && textBox1.Text != "" && IsDigitsOnly(res) == true)
+                        {
+                            textBox3.Text += d[j] + '\r' + '\n';
+                        }
+                    }
+                }
+                if (textBox3.Text == "")
+                {
+                    textBox3.Text = "Таких нету";
+                }
+            }
+
+        }
+
+        private static bool IsDigitsOnly(string str)            // Проверка на содержание только цифр
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
+        }
+
+        private void Button2_Click(object sender, EventArgs e)      //  Кнопка очистки
+        {
+            textBox2.Text = "";
+            textBox1.Text = "";
+            textBox3.Text = "";
+        }
+
+        private void Timer1_Tick(object sender, EventArgs e)        //  Таймер
+        {
+            this.pictureBox1.Left += 10;                                            //  Движение вправо за каждый тик
+            if(this.pictureBox1.Left >= 122 && this.pictureBox1.Left != 0)          //  Условие появления текста во 2 текстбоксе(пока картинка закрывает его)
+            {
+                textBox2.Text = textBox3.Text;                                      
+            }
+            if (this.pictureBox1.Left >= 1500)                                      //  выход за пределы формы
+            {
+                this.pictureBox1.Visible = false;                                   //  Инвиз картинки
+                timer1.Enabled = false;                                             //  Остановка таймера
+            }
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)                       // Не реализованная фича с изменением координат при изменении размера окна
+        {   
+           /*
+            Int32 hf = this.ClientSize.Height;  //644
+            Int32 wf = this.ClientSize.Width;   //1110
+            Int32 hp1 = this.textBox1.Height;
+            Int32 wp1 = this.textBox1.Width;
+
+            hf = (hf - hp1) / 2;
+            wf = (wf - wp1) / 2;
+
+            this.textBox1.Location = new System.Drawing.Point(wf, hf);             
+            */                                                                    
+        }
+      
+    }
+}
